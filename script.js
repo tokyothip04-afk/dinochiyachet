@@ -1,22 +1,24 @@
 const game = document.getElementById("game");
 const dino = document.getElementById("dino");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
 const overlay = document.getElementById("overlay");
 const cloud = document.getElementById("cloud");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
 
 const CLOUD_SPRITES = [
-  "cloud1.webp",
-  "cloud2.webp"
+  "../assets/cloud1.webp",
+  "../assets/cloud2.webp"
 ];
 
 const TREE_SPRITES = [
-  "tree1.webp",
-  "tree2.webp"
+  "../assets/tree1.webp",
+  "../assets/tree2.webp"
 ];
 
 const BUSH_SPRITES = [
-  "bush1.webp",
-  "bush2.webp"
+  "../assets/bush1.webp",
+  "../assets/bush2.webp"
 ];
 
 let cloudSpeed = 0.25;
@@ -34,26 +36,26 @@ const ENEMY = {
   dog: {
     height: 75,
     ratio: 1.05454545455,
-    sprite: "dog.webp",
+    sprite: "../assets/dog.webp",
     hitbox: { w: 0.7, h: 0.7, x: 0.15, y: 0.15 }
   },
   dad: {
     height: 125,
     ratio: 0.6610738255,
-    sprite: "dad.webp",
+    sprite: "../assets/dad.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 },
     dropIn: true
   },
   drunk: {
     height: 115,
     ratio: 0.5670103093,
-    sprite: "drunk.webp",
+    sprite: "../assets/drunk.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 }
   },
   boy: {
     height: 105,
     ratio: 0.6782608696,
-    sprite: "boy.webp",
+    sprite: "../assets/boy.webp",
     hitbox: { w: 0.65, h: 0.75, x: 0.18, y: 0.15 },
     mole: true
   }
@@ -707,6 +709,62 @@ const sendScoreBtn = document.getElementById("sendScoreBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const rankMsg = document.getElementById("rankMsg");
 
+submitScoreBtn.addEventListener("pointerdown", (e) => {
+  e.stopPropagation();
+});
+
+submitScoreBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  scoreModal.classList.add("show");
+  playerName.focus();
+});
+
+closeModalBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  scoreModal.classList.remove("show");
+});
+
+sendScoreBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+
+  // ✅ If already submitted, this button becomes "Play again"
+  if (scoreSubmitted) {
+    scoreModal.classList.remove("show");
+    reset(); // back to default tap-to-start
+    return;
+  }
+
+  if (!LEADERBOARD_URL) return;
+
+  const name = safeNameLocal(playerName.value);
+  if (!name){
+    rankMsg.textContent = "กรุณาใส่ชื่อก่อน";
+    return;
+  }
+
+  sendScoreBtn.disabled = true;
+  closeModalBtn.disabled = true;
+  rankMsg.textContent = "กำลังส่งคะแนน...";
+
+  try{
+    const res = await fetch(LEADERBOARD_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "submit",
+        name,
+        score,
+        ua: navigator.userAgent,
+        device: isMobile() ? "mobile" : "desktop"
+      })
+    });
+
+    const data = await res.json();
+    if (!data || !data.ok) throw new Error(data?.error || "submit failed");
+
+    rankMsg.innerHTML = `คุณอยู่อันดับ <strong style="font-size:1.2em">${data.rank}</strong> จาก <strong style="font-size:1.2em">${data.totalPlayers}</strong> คน`;
+
 // ✅ Switch button mode
 scoreSubmitted = true;
 sendScoreBtn.textContent = "เล่นอีกครั้ง";
@@ -725,6 +783,21 @@ await new Promise(requestAnimationFrame);
 lbCache.all = null;
 lbCache.mobile = null;
 lbCache.desktop = null;
+
+// Refresh the CURRENT view using the normal GET flow (same as toggle)
+await showLeaderboard(lbMode, true);
+
+// Optional: warm the other tabs again so toggling stays instant
+fetchTop10("mobile").catch(()=>{});
+fetchTop10("desktop").catch(()=>{});
+
+  } catch (err){
+    rankMsg.textContent = "ส่งคะแนนไม่สำเร็จ ลองใหม่อีกครั้ง";
+  } finally {
+    sendScoreBtn.disabled = false;
+    closeModalBtn.disabled = false;
+  }
+});
 
 // -----------------------------------
 
