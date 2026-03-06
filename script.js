@@ -159,7 +159,7 @@ function gameOver(){
 
   }
 
-  document.getElementById("title").textContent="พี่ทานตะวันหนีไปแล้ว 😭";
+  document.getElementById("title").textContent="Nooooooooooooooo";
   document.getElementById("subtitle").textContent="แตะจอเพื่อเริ่มใหม่";
 
 }
