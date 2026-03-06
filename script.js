@@ -7,8 +7,8 @@ const cloud = document.getElementById("cloud");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
 
 const CLOUD_SPRITES = [
-  "../cloud1.webp",
-  "../cloud2.webp"
+  "/cloud1.webp",
+  "/cloud2.webp"
 ];
 
 const TREE_SPRITES = [
