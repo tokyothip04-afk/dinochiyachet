@@ -68,7 +68,7 @@ let y = 0;
 let vy = 0;
 
 const GRAVITY = 3000;
-const JUMP_MIN = 800;
+const JUMP_MIN = 1000;
 const HOLD_GRAVITY = 1200;
 const MAX_HOLD_TIME = 0.2;
 
