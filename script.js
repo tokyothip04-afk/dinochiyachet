@@ -2,6 +2,8 @@ const game = document.getElementById("game");
 const dino = document.getElementById("dino");
 const overlay = document.getElementById("overlay");
 const cloud = document.getElementById("cloud");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
 
 const CLOUD_SPRITES = [
@@ -10,12 +12,10 @@ const CLOUD_SPRITES = [
 ];
 
 const TREE_SPRITES = [
-  "tree1.webp",
   "tree2.webp"
 ];
 
 const BUSH_SPRITES = [
-  "bush1.webp",
   "bush2.webp"
 ];
 
@@ -168,14 +168,14 @@ function reset() {
 
   overlay.classList.remove("show");
   document.querySelector(".hint").style.opacity = 1;
-  submitScoreBtn.style.display = "none";
-  scoreModal.classList.remove("show");
-  rankMsg.textContent = "";
-  playerName.value = "";
+  if (submitScoreBtn) submitScoreBtn.style.display = "none";
+  if (scoreModal) scoreModal.classList.remove("show");
+  if (rankMsg) rankMsg.textContent = "";
+  if (playerName) playerName.value = "";
   scoreSubmitted = false;
-  sendScoreBtn.textContent = "ส่งคะแนน";
-  closeModalBtn.style.display = "";
-  rankMsg.textContent = "";
+  if (sendScoreBtn) sendScoreBtn.textContent = "ส่งคะแนน";
+  if (closeModalBtn) closeModalBtn.style.display = "";
+  if (rankMsg) rankMsg.textContent = "";
   scheduleNextSpawn();
 }
 
@@ -194,7 +194,7 @@ function gameOver() {
   overlay.classList.add("show");
 
   // show submit button on game over
-  document.getElementById("submitScoreBtn").style.display = "inline-block";
+  if (submitScoreBtn) submitScoreBtn.style.display = "inline-block";
 
   if (score > best) {
     best = score;
@@ -707,24 +707,11 @@ const sendScoreBtn = document.getElementById("sendScoreBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const rankMsg = document.getElementById("rankMsg");
 
-// ✅ Switch button mode
-scoreSubmitted = true;
-sendScoreBtn.textContent = "เล่นอีกครั้ง";
-
-// allow "play again" click
-sendScoreBtn.disabled = false;
-
-// remove/lock cancel
-closeModalBtn.style.display = "none";
-closeModalBtn.disabled = true;
-
-// allow UI to repaint before leaderboard refresh
-await new Promise(requestAnimationFrame);
-
-// Invalidate caches so next view is fresh
-lbCache.all = null;
-lbCache.mobile = null;
-lbCache.desktop = null;
+function markLeaderboardDirty() {
+  lbCache.all = null;
+  lbCache.mobile = null;
+  lbCache.desktop = null;
+}
 
 // -----------------------------------
 
