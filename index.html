@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWU Runnnnnnnnnnnnnnn!!!</title>
+  <title>PERFECT DAY - Runner</title>
 
   <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,7 +73,7 @@
           aspect-ratio: 231 / 715;
           bottom:14px; /* sits above ground line */
     
-          background-image: url("WEB-04.webp");
+          background-image: url("../assets/WEB-04.webp");
           background-size: contain;
           background-repeat: no-repeat;
         }
@@ -349,10 +349,27 @@
 }
 
   </style>
+
+<link rel="stylesheet" type="text/css" href="../assets/style.css">
 <script src="script.js" defer></script>
+<script src="../assets/menu.js" defer></script>
+  
 </head>
 <body>
 
+  <div class="menu">
+    <button class="menuBtn" id="menuBtn" aria-label="Menu" type="button">
+      <div class="menuIcon" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </button>
+  
+    <div class="menuPanel" id="menuPanel">
+      <a class="menuLink" href="../index.html">ตรวจสอบออเดอร์</a>
+      <a class="menuLink" href="../tracker/index.html">ยอดจองปัจจุบัน</a>
+      <a class="menuLink" href="https://forms.gle/enXgPLy4DEYYtJqY7" target="_blank" rel="noopener noreferrer">สั่งซื้อหนังสือ</a>
+    </div>
+  </div>
 
   <div class="wrap">
     <div class="hud">
@@ -370,11 +387,54 @@
   <div>
     <h2 id="title">พี่ทานตะวันหนีไปแล้ว 😭</h2>
     <p id="subtitle">แตะเพื่อเริ่มใหม่</p>
+    <button id="submitScoreBtn" type="button" style="display:none;">ลงคะแนน</button>
+  </div>
+
+  <div id="scoreModal" class="scoreModal" aria-hidden="true">
+    <div class="modalCard" onclick="event.stopPropagation()">
+      <h2>ส่งคะแนนเข้าตาราง</h2>
+      <div class="sub">ใส่ชื่อ (ไม่เกิน 30 ตัวอักษร)</div>
+
+      <input id="playerName" maxlength="30" placeholder="ชื่อของคุณ" />
+
+      <div class="btnRow">
+        <button id="sendScoreBtn" class="btnPrimary" type="button">ส่งคะแนน</button>
+        <button id="closeModalBtn" class="btnSecondary" type="button">ยกเลิก</button>
+      </div>
+
+      <div id="rankMsg"></div>
+    </div>
   </div>
 </div>
 
-      <img id="charRight" class="charRight struggle" src="WEB-05.webp" alt="" aria-hidden="true">
+      <img id="charRight" class="charRight struggle" src="../assets/WEB-05.webp" alt="" aria-hidden="true">
     </div>
+
+<div class="leaderboardBox" style="margin-top:14px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.35); border-radius:12px; padding:12px; color:#fff; position:relative;">
+
+  <!-- Toggle button -->
+  <button id="lbFilterBtn" type="button"
+    style="position:absolute; top:10px; right:10px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); color:#fff; border-radius:999px; padding:8px 14px; font-size:18px; font-weight:800; cursor:pointer; line-height:1;">
+    📱💻
+  </button>
+
+  <!-- Title -->
+  <div style="text-align:center; font-size:18px; font-weight:800; margin-top:8px; margin-bottom:8px;">
+    คะแนน TOP 10
+  </div>
+
+  <table style="width:100%; border-collapse:collapse; font-size:16px;">
+    <thead style="opacity:.9;">
+      <tr>
+        <th style="text-align:center; padding:6px 0px;">อันดับ</th>
+        <th style="text-align:left; padding:6px 4px;">ชื่อ</th>
+        <th style="text-align:center; padding:6px 4px;">คะแนน</th>
+      </tr>
+    </thead>
+    <tbody id="lbBody"></tbody>
+  </table>
+</div>
+
   </div>
 
 <!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "4b20eaa1814a404f8dae8e97ed62d7e2"}'></script><!-- Cloudflare Pages Analytics --></body>
