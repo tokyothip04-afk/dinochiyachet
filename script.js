@@ -726,21 +726,6 @@ lbCache.all = null;
 lbCache.mobile = null;
 lbCache.desktop = null;
 
-// Refresh the CURRENT view using the normal GET flow (same as toggle)
-await showLeaderboard(lbMode, true);
-
-// Optional: warm the other tabs again so toggling stays instant
-fetchTop10("mobile").catch(()=>{});
-fetchTop10("desktop").catch(()=>{});
-
-  } catch (err){
-    rankMsg.textContent = "ส่งคะแนนไม่สำเร็จ ลองใหม่อีกครั้ง";
-  } finally {
-    sendScoreBtn.disabled = false;
-    closeModalBtn.disabled = false;
-  }
-});
-
 // -----------------------------------
 
 // Controls
