@@ -7,18 +7,18 @@ const cloud = document.getElementById("cloud");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
 
 const CLOUD_SPRITES = [
-  "/cloud1.webp",
-  "/cloud2.webp"
+  "cloud1.webp",
+  "cloud2.webp"
 ];
 
 const TREE_SPRITES = [
-  "../tree1.webp",
-  "../tree2.webp"
+  "tree1.webp",
+  "tree2.webp"
 ];
 
 const BUSH_SPRITES = [
-  "../bush1.webp",
-  "../bush2.webp"
+  "bush1.webp",
+  "bush2.webp"
 ];
 
 let cloudSpeed = 0.25;
