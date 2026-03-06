@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWU Runnnnnnnnn!!!!</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+<style>
+    :root { --w: 1000px; --h: 440px; --h-m: 480px; --pink: #ffffff; --white: #ffffff; }
+    body{
+      margin:0;
+      min-height:100vh;
+
+      display:grid;
+      place-items:center;
+
+      background:#001cbb;
+      color:#111;
+      font-family: "IBM Plex Sans Thai", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+    .wrap{ margin-top: 10px; width:min(var(--w), 94vw); }
+
+    .leaderboardBox{
+      height: 480px;   /* or any height you prefer */
+    }
+    .hud{
+      color:var(--white);
+      font-weight: 500;
+      display:flex; justify-content:space-between; align-items:center;
+      margin:0 0 8px 0; font-size:16px;
+    }
+
+.header{
+background:#fff;
+color:#dcab0b;  
+border:2px solid #fac517;
+border-radius:5px;
+font-family: "Dancing Script", cursive;
+ font-family: "Noto Serif Display", serif;
+  font-optical-sizing: auto;
+
+}
+.game{
+  position:relative;
+  width:100%;
+  height:var(--h);
+  background:#fff;
+  border:2px solid #111;
+  border-radius:10px;
+  overflow:hidden;
+  user-select:none;
+
+  touch-action:none;
+  overscroll-behavior:contain;    
+}
+    .ground{
+      position:absolute; left:0; right:0; bottom:42px; height:2px;
+      background:#111;
+      opacity:.9;
+    }
+    .hint{
+      width: 100%;
+      position: absolute;
+      top: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 800;
+      font-size: 36px;
+      text-align: center;
+      pointer-events: none;
+    }
+    .score {font-weight: 600; font-size:18px}
+    .topscore {font-weight: 600; font-size:22px}
+        .dino{
+          position:absolute;
+          height:150px;
+          aspect-ratio: 991 / 1024;
+          bottom:14px; /* sits above ground line */
+    
+          background-image: url("Ched.webp");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+    .dinoHitbox{
+      position:absolute;
+    
+      /* adjust these to fit torso */
+      width:60%;
+      height:90%;
+    
+      left:10%;
+      bottom:7%;
+    }
+    .dino.running{
+      animation: bob 260ms linear infinite;
+    }
+    @keyframes bob {
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(5px); }
+    }
+    .dino.duck{
+      height:34px; width:56px;
+      border-radius:6px;
+    }
+    .charRight{
+      position:absolute;
+      right:-48px;
+      bottom:14px;          /* same baseline as dino/obstacles */
+      height:250px;         /* control size here */
+      width:auto;
+      transform: scaleX(-1);
+      transform-origin: 50% 100%;
+      transition: right 600ms ease-in;
+      pointer-events:none;
+      z-index:10;
+    }
+    
+    .charRight.runAway{
+      right:-200px; /* move off screen */
+    }
+    
+    @keyframes struggle{
+      0%   { transform: scaleX(-1) rotate(0deg) translateY(0); }
+      25%  { transform: scaleX(-1) rotate(-16deg) translateY(1px); }
+      50%  { transform: scaleX(-1) rotate(4deg) translateY(0); }
+      75%  { transform: scaleX(-1) rotate(-16deg) translateY(1px); }
+      100% { transform: scaleX(-1) rotate(0deg) translateY(0); }
+    }
+    .obstacle{
+      position:absolute;
+      bottom:14px;
+      width:22px; height:46px;
+      background:transparent;
+      border-radius:6px;
+    }
+.obstacle.flip {
+  transform: scaleX(-1);
+}
+@keyframes enemyBob {
+  0%,100% { transform: scaleX(-1) rotate(3deg) translateY(0); }
+  50% { transform: scaleX(-1) rotate(9deg) translateY(-6px); }
+}
+
+.obstacle.enemyBob{
+  animation: enemyBob 250ms ease-in-out infinite;
+}
+@keyframes drunkFallRight {
+  0%   { transform: rotate(0deg) translateX(0) translateY(0); }
+  40%  { transform: rotate(16deg) translateX(0) translateY(0); }          /* wobble */
+  72%  { transform: rotate(90deg) translateX(-30px) translateY(0); }       /* flop */
+  86%  { transform: rotate(90deg) translateX(-26px)  translateY(2px); }     /* bounce */
+  100% { transform: rotate(90deg) translateX(-30px) translateY(0); }       /* settle */
+}
+
+.obstacle.drunkFallRight{
+  transform-origin: bottom center;     /* better: no huge lateral jump */
+  animation: drunkFallRight 420ms cubic-bezier(.2,.9,.2,1) forwards;
+}
+    .cloud{
+      position:absolute;
+      top:40px;
+      height:100px;
+      width:auto;
+      pointer-events:none;
+      opacity:0.1;
+    }
+    .scenery{
+      position:absolute;
+      bottom:40px;                 /* same as GROUND_Y */
+      transform: translateX(-50%); /* center-bottom anchor */
+      transform-origin: center bottom;
+      pointer-events:none;
+      z-index: 1;                  /* behind enemies */
+      opacity:0.15;
+    }
+    .overlay{
+      z-index: 9;
+      position:absolute; inset:0;
+      display:grid; place-items: center;
+      background:rgba(255,255,255,.75);
+      backdrop-filter: blur(2px);
+      text-align:center;
+      padding:16px;
+      visibility:hidden;
+    }
+    .overlay.show{ visibility:visible; }
+    .overlay h2{ margin:0 0 8px 0; }
+    .overlay p{ margin:0 0 12px 0; opacity:.85; }
+
+    .hitboxDebug{
+      position: fixed;
+      border: 2px solid red;
+      background: rgba(255,0,0,0.15);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+/* modal layer that covers the whole game */
+.scoreModal{
+  position:absolute;
+  inset:0;                 /* ✅ fills the game area */
+  display:none;            /* show with JS */
+  place-items:center;      /* ✅ center */
+  background: rgba(0,0,0,.25);
+  z-index: 50;             /* ✅ higher than overlay (overlay is 9) */
+}
+
+/* show state */
+.scoreModal.show{ display:grid; }
+
+/* modal backdrop already ok, this is the card */
+.scoreModal .modalCard{
+  width: min(520px, calc(100vw - 32px)); /* never exceed screen */
+  background:#fff;
+  border:2px solid #111;
+  border-radius:18px;
+  padding:22px 18px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;   /* ✅ center */
+  text-align:center;    /* ✅ center text */
+  box-sizing:border-box;
+}
+
+#scoreModal input{
+  width: 100%;          /* ✅ fits inside card */
+  max-width: 420px;     /* optional: keep it nice */
+  box-sizing:border-box;
+
+  font-family: "IBM Plex Sans Thai", system-ui, sans-serif; /* ✅ same font */
+  font-size:18px;
+  font-weight:600;
+  text-align:center;
+
+  padding:14px 18px;
+  border-radius:999px;
+  border:1px solid #111;
+  margin:18px 0;
+  outline:none;
+}
+
+#scoreModal input::placeholder{
+  text-align:center;
+}
+
+#scoreModal input:focus{
+  border-color:#111;
+  box-shadow: 0 0 0 4px rgba(219,105,111,.25);
+}
+
+#scoreModal button{
+  font-family: "IBM Plex Sans Thai", system-ui, sans-serif; /* ✅ same font */
+}
+
+#scoreModal .btnRow{
+  width:100%;
+  display:flex;
+  justify-content:center;  /* ✅ center */
+  gap:14px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+
+#scoreModal .btnPrimary,
+#scoreModal .btnSecondary{
+  min-width: 140px;
+}
+
+#rankMsg{
+  margin-top:16px;
+}
+
+.btnPrimary{
+  background:#db696f;
+  color:#fff;
+  border:none;
+
+  padding:12px 18px;
+  border-radius:999px;
+
+  font-weight:700;
+  font-size:16px;
+
+  cursor:pointer;
+
+  transition:all .15s ease;
+}
+
+.btnPrimary:hover{
+  filter:brightness(1.05);
+}
+
+.btnPrimary:active{
+  transform:scale(.97);
+}
+
+.btnSecondary{
+  background:#ececec;
+  color:#111;
+
+  border:2px solid #d0d0d0;
+
+  padding:12px 18px;
+  border-radius:999px;
+
+  font-weight:600;
+  font-size:16px;
+
+  cursor:pointer;
+
+  transition:all .15s ease;
+}
+
+.btnSecondary:hover{
+  background:#e2e2e2;
+}
+
+.btnSecondary:active{
+  transform:scale(.97);
+}
+
+#submitScoreBtn{
+  font-family: "IBM Plex Sans Thai", system-ui, sans-serif;
+  font-weight:700;
+  font-size: 18px;
+
+  background:#ececec;
+  border:2px solid #cfcfcf;
+  border-radius:999px;
+
+  padding:10px 18px;
+
+  transition:all .15s ease;
+}
+
+#submitScoreBtn:hover{
+  background:#e5e5e5;
+}
+
+#submitScoreBtn:active{
+  transform:scale(.97);
+}
+
+@media (max-width: 520px){
+.wrap{ margin-top: 80px; }
+.leaderboardBox{ margin-bottom: 20px; }
+.game{ height:var(--h-m); }
+}
+
+  </style>
+
+<script src="script2.js" defer></script>
+  
+</head>
+<body>
+
+<div class="header">
+<h1>👑UWU Runnnnnnnnn!!!!👑</h1>
+</div>
+  
+  <div class="wrap">
+    <div class="hud">
+      <div>Space / แตะจอ = กระโดด<br>แตะค้างเพื่อกระโดดสูงขึ้น</div>
+      <div style="line-height:1.2">คะแนน: <span class="score" id="score">0</span><br>สูงสุด: <span class="topscore" id="best">0</span></div>
+    </div>
+
+    <div class="game" id="game" aria-label="Dino runner game" role="application">
+      <div class="hint">แตะจอเพื่อเริ่มเล่น</div>
+      <img class="cloud" id="cloud" alt="">
+      <div class="ground"></div>
+      <div class="dino" id="dino"><div class="dinoHitbox"></div></div>
+
+      <div class="overlay" id="overlay">
+  <div>
+    <h2 id="title">Nooooooooooooo </h2>
+    <p id="subtitle">แตะเพื่อเริ่มใหม่</p>
+    <button id="submitScoreBtn" type="button" style="display:none;">ลงคะแนน</button>
+  </div>
+
+  <div id="scoreModal" class="scoreModal" aria-hidden="true">
+    <div class="modalCard" onclick="event.stopPropagation()">
+      <h2>ส่งคะแนนเข้าตาราง</h2>
+      <div class="sub">ใส่ชื่อ (ไม่เกิน 30 ตัวอักษร)</div>
+
+      <input id="playerName" maxlength="30" placeholder="ชื่อของคุณ" />
+
+      <div class="btnRow">
+        <button id="sendScoreBtn" class="btnPrimary" type="button">ส่งคะแนน</button>
+        <button id="closeModalBtn" class="btnSecondary" type="button">ยกเลิก</button>
+      </div>
+
+      <div id="rankMsg"></div>
+    </div>
+  </div>
+</div>
+
+      <img id="charRight" class="charRight struggle" src="chet.webp" alt="" aria-hidden="true">
+    </div>
+
+  </div>
+
+</body>
+</html>
