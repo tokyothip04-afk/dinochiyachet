@@ -36,26 +36,26 @@ const ENEMY = {
   dog: {
     height: 75,
     ratio: 1.05454545455,
-    sprite: "../dog.webp",
+    sprite: "dog.webp",
     hitbox: { w: 0.7, h: 0.7, x: 0.15, y: 0.15 }
   },
   dad: {
     height: 125,
     ratio: 0.6610738255,
-    sprite: "../dad.webp",
+    sprite: "dad.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 },
     dropIn: true
   },
   drunk: {
     height: 115,
     ratio: 0.5670103093,
-    sprite: "../drunk.webp",
+    sprite: "drunk.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 }
   },
   boy: {
     height: 105,
     ratio: 0.6782608696,
-    sprite: "../boy.webp",
+    sprite: "boy.webp",
     hitbox: { w: 0.65, h: 0.75, x: 0.18, y: 0.15 },
     mole: true
   }
