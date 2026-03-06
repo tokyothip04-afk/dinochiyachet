@@ -34,7 +34,7 @@ const ENEMY = {
   dog: {
     height: 75,
     ratio: 1.05,
-    sprite: "dog.webp",
+    sprite: "circle2.webp",
     hitbox: { w: 0.7, h: 0.7, x: 0.15, y: 0.15 }
   },
   dad: {
@@ -47,13 +47,13 @@ const ENEMY = {
   drunk: {
     height: 115,
     ratio: 0.56,
-    sprite: "drunk.webp",
+    sprite: "circle1.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 }
   },
   boy: {
     height: 105,
     ratio: 0.67,
-    sprite: "boy.webp",
+    sprite: "circle.webp",
     hitbox: { w: 0.65, h: 0.75, x: 0.18, y: 0.15 },
     mole: true
   }
