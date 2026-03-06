@@ -1,7 +1,5 @@
 const game = document.getElementById("game");
 const dino = document.getElementById("dino");
-const scoreEl = document.getElementById("score");
-const bestEl = document.getElementById("best");
 const overlay = document.getElementById("overlay");
 const cloud = document.getElementById("cloud");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
@@ -708,62 +706,6 @@ const playerName = document.getElementById("playerName");
 const sendScoreBtn = document.getElementById("sendScoreBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const rankMsg = document.getElementById("rankMsg");
-
-submitScoreBtn.addEventListener("pointerdown", (e) => {
-  e.stopPropagation();
-});
-
-submitScoreBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  scoreModal.classList.add("show");
-  playerName.focus();
-});
-
-closeModalBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  scoreModal.classList.remove("show");
-});
-
-sendScoreBtn.addEventListener("click", async (e) => {
-  e.stopPropagation();
-
-  // ✅ If already submitted, this button becomes "Play again"
-  if (scoreSubmitted) {
-    scoreModal.classList.remove("show");
-    reset(); // back to default tap-to-start
-    return;
-  }
-
-  if (!LEADERBOARD_URL) return;
-
-  const name = safeNameLocal(playerName.value);
-  if (!name){
-    rankMsg.textContent = "กรุณาใส่ชื่อก่อน";
-    return;
-  }
-
-  sendScoreBtn.disabled = true;
-  closeModalBtn.disabled = true;
-  rankMsg.textContent = "กำลังส่งคะแนน...";
-
-  try{
-    const res = await fetch(LEADERBOARD_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "submit",
-        name,
-        score,
-        ua: navigator.userAgent,
-        device: isMobile() ? "mobile" : "desktop"
-      })
-    });
-
-    const data = await res.json();
-    if (!data || !data.ok) throw new Error(data?.error || "submit failed");
-
-    rankMsg.innerHTML = `คุณอยู่อันดับ <strong style="font-size:1.2em">${data.rank}</strong> จาก <strong style="font-size:1.2em">${data.totalPlayers}</strong> คน`;
 
 // ✅ Switch button mode
 scoreSubmitted = true;
