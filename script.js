@@ -7,18 +7,18 @@ const cloud = document.getElementById("cloud");
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; // <-- paste the new web app URL
 
 const CLOUD_SPRITES = [
-  "../assets/cloud1.webp",
-  "../assets/cloud2.webp"
+  "../cloud1.webp",
+  "../cloud2.webp"
 ];
 
 const TREE_SPRITES = [
-  "../assets/tree1.webp",
-  "../assets/tree2.webp"
+  "../tree1.webp",
+  "../tree2.webp"
 ];
 
 const BUSH_SPRITES = [
-  "../assets/bush1.webp",
-  "../assets/bush2.webp"
+  "../bush1.webp",
+  "../bush2.webp"
 ];
 
 let cloudSpeed = 0.25;
@@ -36,26 +36,26 @@ const ENEMY = {
   dog: {
     height: 75,
     ratio: 1.05454545455,
-    sprite: "../assets/dog.webp",
+    sprite: "../dog.webp",
     hitbox: { w: 0.7, h: 0.7, x: 0.15, y: 0.15 }
   },
   dad: {
     height: 125,
     ratio: 0.6610738255,
-    sprite: "../assets/dad.webp",
+    sprite: "../dad.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 },
     dropIn: true
   },
   drunk: {
     height: 115,
     ratio: 0.5670103093,
-    sprite: "../assets/drunk.webp",
+    sprite: "../drunk.webp",
     hitbox: { w: 0.6, h: 0.8, x: 0.2, y: 0.1 }
   },
   boy: {
     height: 105,
     ratio: 0.6782608696,
-    sprite: "../assets/boy.webp",
+    sprite: "../boy.webp",
     hitbox: { w: 0.65, h: 0.75, x: 0.18, y: 0.15 },
     mole: true
   }
