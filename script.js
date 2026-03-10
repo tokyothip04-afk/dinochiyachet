@@ -1,4 +1,3 @@
-const gameWrapper = document.getElementById("gameWrapper");
 const game = document.getElementById("game");
 const dino = document.getElementById("dino");
 const scoreEl = document.getElementById("score");
@@ -13,26 +12,6 @@ const rankMsg = document.getElementById("rankMsg");
 
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyxzYULoMltIpiJeoabeCipMgxhK6eF7KxVMjNHTl17b7fR6a6tJKGYyrGIWBDPZd1l/exec"; 
 
-// --- ระบบย่อส่วนเกมอัตโนมัติ (Responsive Scaling) ---
-const GAME_WIDTH = 900;
-const GAME_HEIGHT = 440;
-
-function resizeGame() {
-  // หาความกว้างของคอนเทนเนอร์ที่บรรจุเกม
-  const containerWidth = gameWrapper.parentElement.clientWidth; 
-  // คำนวณอัตราส่วน (ไม่ให้ใหญ่เกิน 100%)
-  let scale = containerWidth / GAME_WIDTH;
-  if (scale > 1) scale = 1;
-
-  // สั่งย่อส่วนตัวเกม
-  game.style.transform = `scale(${scale})`;
-  // หดความสูงของกล่องหุ้ม เพื่อไม่ให้เหลือพื้นที่ว่างด้านล่าง
-  gameWrapper.style.height = `${GAME_HEIGHT * scale}px`;
-}
-window.addEventListener("resize", resizeGame);
-resizeGame(); // เรียกใช้งานครั้งแรกตอนโหลด
-// ---------------------------------------------
-
 const CLOUD_SPRITES = ["ccc.webp", "sc.webp"];
 const TREE_SPRITES = ["t1.webp", "t2.webp"];
 const BUSH_SPRITES = ["b1.webp", "b2.webp"];
@@ -40,8 +19,10 @@ const BUSH_SPRITES = ["b1.webp", "b2.webp"];
 let cloudSpeed = 0.25;
 let scenery = [];
 
+const BASE_WIDTH = 900;
 const GROUND_Y = 14;
 const DINO_X = 10;
+const DEBUG_HITBOX = false;
 
 const SPEED_BASE = 420;
 const SPEED_RAMP = 10;
@@ -62,6 +43,7 @@ const SPEED_GAP_CAP = 280;
 let running = false;
 let dead = false;
 
+// Dino physics
 let y = 0;
 let vy = 0;
 const GRAVITY = 3000;
@@ -72,6 +54,7 @@ const MAX_HOLD_TIME = 0.20;
 let jumpHold = false;
 let jumpHoldLeft = 0;
 
+// Obstacles & Game state
 let obstacles = [];
 let spawnTimer = 0;
 
@@ -106,6 +89,17 @@ const pick = (arr) => arr[(Math.random() * arr.length) | 0];
 function isMobile() { return window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 1; }
 function randomCloud() { return CLOUD_SPRITES[(Math.random() * CLOUD_SPRITES.length) | 0]; }
 
+function drawHitbox(rect) {
+  const el = document.createElement("div");
+  el.className = "hitboxDebug";
+  el.style.left = rect.left + "px";
+  el.style.top = rect.top + "px";
+  el.style.width = rect.width + "px";
+  el.style.height = rect.height + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 16);
+}
+
 function reset() {
   document.querySelector(".charRight")?.classList.remove("runAway");
   jumpHold = false;
@@ -134,7 +128,7 @@ function reset() {
   cloud.src = randomCloud();
   cloud.style.top = rand(20, 70) + "px";
   cloudSpeed = rand(0.18, 0.35);
-  cloudX = GAME_WIDTH + 40;
+  cloudX = game.clientWidth + 40;
   cloud.style.transform = `translate3d(${cloudX}px, 0, 0)`;
 
   overlay.classList.remove("show");
@@ -194,7 +188,7 @@ function addObstacle({ type, bottom, speedMult = 1 }) {
   el.className = "obstacle";
   const h = enemy.height;
   const w = h * enemy.ratio;
-  const x = GAME_WIDTH + 20;
+  const x = game.clientWidth + 20;
 
   el.style.left = x + "px";
   el.style.bottom = bottom + "px";
@@ -260,12 +254,12 @@ function spawnObstacle() {
 function canSpawn() {
   if (obstacles.length === 0) return true;
   const last = obstacles[obstacles.length - 1];
-  const distanceFromRightEdge = (GAME_WIDTH - last.x);
-  
-  // เนื่องจากเราล็อกขนาดเกมที่ 900px เสมอ การคำนวณระยะก็นิ่งขึ้นครับ
-  const speedGap = Math.min(SPEED_GAP_CAP, speed * 0.25);
-  const required = SPAWN_GAP + speedGap;
-  
+  const distanceFromRightEdge = (game.clientWidth - last.x);
+  const rawScale = game.clientWidth / BASE_WIDTH;
+  const widthScale = Math.max(0.85, Math.min(1.35, rawScale));
+  const ws = Math.min(1.2, widthScale);
+  const speedGap = Math.min(SPEED_GAP_CAP, speed * ws * 0.25);
+  const required = (SPAWN_GAP / ws) + speedGap;
   return distanceFromRightEdge > required;
 }
 
@@ -284,7 +278,7 @@ function spawnScenery() {
   el.style.width = "auto";
 
   const last = scenery.length ? scenery[scenery.length - 1] : null;
-  const startX = GAME_WIDTH + 80;
+  const startX = game.clientWidth + 80;
   const x = last ? Math.max(startX, last.x + SCENERY_GAP + rand(0, 120)) : startX;
 
   el.style.transform = `translate3d(${x}px, 0, 0)`;
@@ -294,6 +288,9 @@ function spawnScenery() {
 }
 
 function update(dt) {
+  const rawScale = game.clientWidth / BASE_WIDTH;
+  const widthScale = Math.max(0.85, Math.min(1.35, rawScale)); 
+
   if (running && !dead) {
     speed += SPEED_RAMP * dt;
     scoreAcc += 60 * dt;
@@ -319,23 +316,22 @@ function update(dt) {
 
     const toRemove = [];
     for (const o of obstacles) {
-      // เอา widthScale ออก เพราะเราจัดการเรื่องสัดส่วนด้วย CSS Transform แล้ว
-      o.x -= (speed * o.speedMult) * dt; 
+      o.x -= (speed * widthScale * o.speedMult) * dt;
       o.el.style.left = o.x + "px";
 
-      if (o.mole && !o.popped && o.x <= GAME_WIDTH - MOLE_ZONE_W) {
+      if (o.mole && !o.popped && o.x <= game.clientWidth - MOLE_ZONE_W) {
         o.popped = true;
         o.el.style.transform = "translateY(0)";
         o.armAt = performance.now() + MOLE_ARM_MS;
       }
 
-      if (o.drop && !o.dropped && o.x <= GAME_WIDTH - DROP_ZONE_W) {
+      if (o.drop && !o.dropped && o.x <= game.clientWidth - DROP_ZONE_W) {
         o.dropped = true;
         o.el.style.transform = "translateY(0)";
         o.dropAt = performance.now() + DROP_ARM_MS;
       }
 
-      if (o.drunkFall && !o.drunkFallen && o.x <= GAME_WIDTH * (1 - DRUNK_FALL_AFTER_FRAC)) {
+      if (o.drunkFall && !o.drunkFallen && o.x <= game.clientWidth * (1 - DRUNK_FALL_AFTER_FRAC)) {
         o.drunkFallen = true;
         o.el.classList.add("drunkFallRight");
         o.drunkArmAt = performance.now() + DRUNK_FALL_ARM_MS;
@@ -349,10 +345,10 @@ function update(dt) {
       obstacles.splice(obstacles.indexOf(o), 1);
     }
 
-    cloudX -= (speed * cloudSpeed) * dt;
+    cloudX -= (speed * widthScale * cloudSpeed) * dt;
     const cloudW = cloud.getBoundingClientRect().width || 80;
     if (cloudX < -cloudW - 10) {
-      cloudX = GAME_WIDTH + 40;
+      cloudX = game.clientWidth + 40;
       cloud.src = randomCloud();
       cloud.style.top = rand(20, 70) + "px";
       cloudSpeed = rand(0.18, 0.35);
@@ -361,7 +357,7 @@ function update(dt) {
 
     for (let i = scenery.length - 1; i >= 0; i--) {
       const s = scenery[i];
-      s.x -= (speed * s.speed) * dt;
+      s.x -= (speed * widthScale * s.speed) * dt;
       s.el.style.transform = `translate3d(${s.x}px, 0, 0)`;
 
       const w = s.el.getBoundingClientRect().width || 120;
@@ -374,24 +370,25 @@ function update(dt) {
 
     const hit = dino.querySelector(".dinoHitbox");
     const dRect = (hit ? hit : dino).getBoundingClientRect();
+    if (DEBUG_HITBOX) drawHitbox(dRect);
 
     for (const o of obstacles) {
       if (o.mole && (!o.popped || performance.now() < o.armAt)) continue;
       if (o.drop && (!o.dropped || performance.now() < o.dropAt)) continue;
       if (o.drunkFall && o.drunkFallen && performance.now() < o.drunkArmAt) continue;
       const oRect = (o.hit ? o.hit : o.el).getBoundingClientRect();
-      
+      if (DEBUG_HITBOX) drawHitbox(oRect);
       if (rectsOverlap(dRect, oRect)) {
         gameOver();
         break;
       }
     }
   } else {
-    // ไอเดิลแบ็คกราวน์
+    // Idle background movement
     cloudX -= (40 * cloudSpeed) * dt;
     const cloudW = cloud.getBoundingClientRect().width || 80;
     if (cloudX < -cloudW - 10) {
-      cloudX = GAME_WIDTH + 40;
+      cloudX = game.clientWidth + 40;
       cloud.src = randomCloud();
       cloud.style.top = rand(20, 70) + "px";
       cloudSpeed = rand(0.18, 0.35);
@@ -427,6 +424,8 @@ function safeNameLocal(raw){
   s = s.replace(/[^\p{L}\p{M}\p{N} ._\-()'’]/gu, "");
   return s.replace(/\s+/g, " ").trim();
 }
+
+// ---------------- Leaderboard Modal Events ----------------
 
 closeModalBtn.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -485,7 +484,7 @@ sendScoreBtn.addEventListener("click", async (e) => {
   }
 });
 
-// การควบคุมเกม
+// Controls
 window.addEventListener("keydown", (e) => {
   if (e.target.closest("input, textarea")) return;
   if (e.code === "Space") {
@@ -499,8 +498,7 @@ window.addEventListener("keyup", (e) => {
   if (e.code === "Space") jumpHold = false;
 });
 
-// เช็คเป้าหมายการกดด้วย #gameWrapper แทนตัวเกมตรงๆ
-gameWrapper.addEventListener("pointerdown", (e) => {
+game.addEventListener("pointerdown", (e) => {
   if (e.target.closest("button, input, .leaderboard, .scoreModal")) return;
   if (e.pointerType !== "mouse") return;
   if (dead) { reset(); start(); return; }
@@ -508,7 +506,7 @@ gameWrapper.addEventListener("pointerdown", (e) => {
   jumpHold = true;       
 }, { passive: true });
 
-gameWrapper.addEventListener("pointerup", (e) => {
+game.addEventListener("pointerup", (e) => {
   if (e.pointerType === "mouse") jumpHold = false;      
 }, { passive: true });
 
@@ -516,16 +514,16 @@ window.addEventListener("pointerup", (e) => {
   if (e.pointerType === "mouse") jumpHold = false;
 });
 
-gameWrapper.addEventListener("touchstart", (e) => {
+game.addEventListener("touchstart", (e) => {
   if (e.target.closest("button, input, .scoreModal")) return;
   e.preventDefault();
   if (dead) { reset(); start(); return; }
   jump();
 }, { passive: false });
 
-gameWrapper.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-gameWrapper.addEventListener("touchend", () => jumpHold = false);
-gameWrapper.addEventListener("touchcancel", () => jumpHold = false);
+game.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+game.addEventListener("touchend", () => jumpHold = false);
+game.addEventListener("touchcancel", () => jumpHold = false);
 
 // Init
 reset();
